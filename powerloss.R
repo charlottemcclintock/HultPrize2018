@@ -7,14 +7,19 @@ library(dplyr)
 
 # set up
 getwd()
-setwd("/Users/charmed33/R/Hult")
+setwd("/Users/charmed33/R/HultPrize2018")
 
 # read in the data, all from the world bank
-powerloss <- read_csv("electric_loss.csv", skip = 4)
-access <- read_csv("access.csv", skip = 4)
+powerloss <- read_csv("electric_loss.csv", skip = 4) 
+# Electric power transmission and distribution losses (% of output)
+access <- read_csv("access.csv", skip = 4) 
+# Access to electricity (% of population)
 population <- read_csv("population.csv", skip = 4)
+# Population, total
 kwh <- read_csv("kwhpercap.csv", skip = 4)
+# Electric power consumption (kWh per capita)
 gdp <- read_csv("gdp.csv", skip = 4)
+# GDP (current US$)
 countries <- read_csv("wb_countrydata.csv")
 
 # change some names, use data from 2014, last available
@@ -49,7 +54,7 @@ kwh <- select(kwh, country, country_code, kwh)
 access <- select(access, country, country_code, access)
 
 # merge it all together
-power <- left_join(powerloss, countries, by = c("country_code" = "country_code", "country" = "country"))
+power <- left_join(powerloss, countries, by = c("country_code" = "country_code","country" = "country"))
 power <- left_join(power, population, by = c("country_code" = "country_code", "country" = "country"))
 power <- left_join(power, gdp, by = c("country_code" = "country_code", "country" = "country"))
 power <- left_join(power, kwh, by = c("country_code" = "country_code", "country" = "country"))
@@ -89,11 +94,11 @@ numbyincome <- as.data.frame(power %>%
              group_by(income_group) %>% 
              summarise(byincome = n()))
 
-# generalized linear models
+# generalized linear models #### ADD COMMENTED SUMMARIES
 
 # gdp per capita vs. percent loss
 gdp_percentloss <- glm(gdp_percap ~ percentloss, data = power)
-summary(gdp_percentloss)
+summary(gdp_percentloss) 
 
 # kwh per capita vs. percent loss
 percentloss_kwh <-  glm(kwh ~ percentloss, data = power)
@@ -104,24 +109,52 @@ gdp_kwh <-  glm(gdp_percap ~ kwh, data = power)
 summary(gdp_kwh)
 
 # access vs. loss
-
+access_loss <- glm(access ~ kwh, data = power)
+summary(access_loss)
 
 
 # some visualization
 
 # gdp per capita vs. percent loss
 ggplot(data = power, mapping = aes(gdp_percap, percentloss, na.rm = TRUE)) + 
-  geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE)
+  geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE) +
+  labs(colour = "Income Level", 
+       title = "GDP per Capita vs. Transmission & Distribution Loss (% of output)", 
+       caption = "based on most recent available data from the World Bank (2014)",
+       x = "GDP per Capita (US$)", 
+       y = "Electric power transmission and distribution losses (% of output)")
 
 # kwh per capita vs. percent loss
 ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) + 
-  geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE)
+  geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE) +
+  labs(colour = "Income Level", 
+       title = "GDP per Capita vs. kWh per Capita", 
+       caption = "based on most recent available data from the World Bank (2014)",
+       x = "kWh per Capita", 
+       y = "Electric power transmission and distribution losses (% of output)")
 
 # kwh per capita vs. gdp per capita
 ggplot(data = power, mapping = aes(gdp_percap, kwh), na.rm = TRUE) + 
   geom_point(aes(colour = factor(income_group)), size = 2) + 
-  geom_smooth(method = "lm", se = FALSE) + coord_cartesian(xlim = c(0,125000), ylim=c(0,25000))
+  geom_smooth(method = "lm", se = FALSE) + coord_cartesian(xlim = c(0,125000), ylim=c(0,25000)) +
+  labs(colour = "Income Level", 
+       title = "GDP per Capita vs. kWh per Capita", 
+       caption = "based on most recent available data from the World Bank (2014)",
+       x = "GDP per Capita", 
+       y = "kWh per Capita")
+
 # kwh per capita vs. percent access
-ggplot(data = power, mapping = aes(kwh, access), na.rm = TRUE) + 
+ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) + 
   geom_point(aes(colour = factor(income_group)), size = 2) + 
-  coord_cartesian(xlim = c(0,15000))
+  coord_cartesian(ylim = c(0,25000)) + 
+  labs(colour = "Income Level", 
+       title = "Percent Access to Electricity vs. kWh per Capita", 
+       caption = "based on most recent available data from the World Bank (2014)",
+       x = "Access to Electricity(%)", 
+       y = "kWh per Capita")
+
+
+
+
+
+
