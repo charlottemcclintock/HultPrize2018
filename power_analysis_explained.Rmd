@@ -1,19 +1,14 @@
-# HultPrize2018
-Data analysis of energy consumption, theft, and covariates for pitch at the Boston Regional Finals.
+---
+title: 'HultPrize2018: Electric Power Loss & Covariates'
+author: "C. McClintock"
+date: "Spring 2018"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    depth: 5
+---
 
-### Goal: 
-Explore trends related to global electricity theft to better understand energy consumption and correlated variables to pitch a scalable, sustainable social enterprise to bring energy to 10 million people currently living in energy poverty. 
-
-Data accessed through the [World Bank Open Data Portal](https://data.worldbank.org)
-* Data Sets:
-  + [Population, total](https://data.worldbank.org/indicator/SP.POP.TOTL)
-  + [GDP (current US$)](https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
-  + [Access to electricity (% of population)](https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS)
-  + [Electric power consumption (kWh per capita)](https://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC)
-  + [Electric power transmission and distribution losses (% of output)](https://data.worldbank.org/indicator/EG.ELC.LOSS.ZS)
-  
-  
-  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning = FALSE)
 setwd("/Users/charmed33/R/HultPrize2018")
@@ -137,10 +132,46 @@ ggplot(data = power, mapping = aes(gdp_percap, kwh), na.rm = TRUE) +
        y = "kWh per Capita")
 ```
 
+Next, looking at electric power distribution and transmission loss as a function of GDP per capita. As expected, the highest output losses occur in the lowest income countries.  
+
+### GDP per Capita vs. Transmission & Distribution Loss (% of output)
+
+```{r plot 2, echo = FALSE}
+# gdp per capita vs. percent loss
+ggplot(data = power, mapping = aes(gdp_percap, percentloss, na.rm = TRUE)) + 
+  geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE) +
+  coord_cartesian(xlim = c(0, 125000)) + labs(colour = "Income Level", 
+       title = "GDP per Capita vs. Transmission & Distribution Loss (% of output)", 
+       caption = "based on most recent available data from the World Bank (2014)",
+       x = "GDP per Capita (US$)", 
+       y = "Electric power transmission and distribution losses (% of output)")
+```
+
+### kWh per Capita vs. Transmission & Distribution Loss (% of output
+```{r plot 3, echo = FALSE}
+# kwh per capita vs. percent loss
+ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) + 
+  geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE) +
+  coord_cartesian(xlim = c(0, 25000)) + labs(colour = "Income Level", 
+       title = "kWh per Capita vs. Transmission & Distribution Loss (% of output)", 
+       caption = "based on most recent available data from the World Bank (2014)",
+       x = "kWh per Capita", 
+       y = "Electric power transmission and distribution losses (% of output)")
+```
 
 
+### Percent Access to Electricity vs. kWh per Capita
+``` {r plot 4, echo = FALSE}
+# kwh per capita vs. percent access
+ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) + 
+  geom_point(aes(colour = factor(income_group)), size = 2) + 
+  coord_cartesian(ylim = c(0,25000)) + 
+  labs(colour = "Income Level", 
+       title = "Percent Access to Electricity vs. kWh per Capita", 
+       caption = "based on most recent available data from the World Bank (2014)",
+       x = "Access to Electricity(%)", 
+       y = "kWh per Capita")
+```
 
 
-
-
-
+  

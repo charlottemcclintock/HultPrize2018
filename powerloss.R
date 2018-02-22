@@ -26,6 +26,8 @@ kwh <- read_csv("kwhpercap.csv", skip = 4)
 gdp <- read_csv("gdp.csv", skip = 4)
 # GDP (current US$)
 countries <- read_csv("wb_countrydata.csv")
+# Children out of school, female (% of female primary school age)
+girlsed <- read_csv("girlsed.csv", skip = 4)
 
 # change some names, use data from 2014, last available
 colnames(powerloss)[colnames(powerloss)=="Country Name"] <- "country"
@@ -48,6 +50,10 @@ colnames(access)[colnames(access)=="Country Name"] <- "country"
 colnames(access)[colnames(access)=="Country Code"] <- "country_code"
 colnames(access)[colnames(access)=="2014"] <- "access"
 
+colnames(girlsed)[colnames(girlsed)=="Country Name"] <- "country"
+colnames(girlsed)[colnames(girlsed)=="Country Code"] <- "country_code"
+colnames(girlsed)[colnames(girlsed)=="2014"] <- "girlsed"
+
 names(countries) <- c("country_code","region","income_group","country")
 
 
@@ -57,16 +63,26 @@ population <- select(population, country, country_code, population)
 gdp <- select(gdp, country, country_code, gdp)
 kwh <- select(kwh, country, country_code, kwh)
 access <- select(access, country, country_code, access)
+girlsed <- select(girlsed, country, country_code, girlsed)
 
 # merge it all together
-power <- left_join(powerloss, countries, by = c("country_code" = "country_code","country" = "country"))
-power <- left_join(power, population, by = c("country_code" = "country_code", "country" = "country"))
-power <- left_join(power, gdp, by = c("country_code" = "country_code", "country" = "country"))
-power <- left_join(power, kwh, by = c("country_code" = "country_code", "country" = "country"))
-power <- left_join(power, access, by = c("country_code" = "country_code", "country" = "country"))
+power <- left_join(powerloss, countries, by = 
+           c("country_code" = "country_code","country" = "country"))
+power <- left_join(power, population, by = 
+           c("country_code" = "country_code", "country" = "country"))
+power <- left_join(power, gdp, by = 
+           c("country_code" = "country_code", "country" = "country"))
+power <- left_join(power, kwh, by = 
+           c("country_code" = "country_code", "country" = "country"))
+power <- left_join(power, access, by = 
+           c("country_code" = "country_code", "country" = "country"))
+power <- left_join(power, girlsed, by = 
+           c("country_code" = "country_code", "country" = "country"))
 
-power <- select(power, country, country_code, region, income_group, gdp, population, everything())
+# create gdp per capita by dividing gdp by population
 power <- mutate(power, gdp_percap = gdp / population)
+power <- select(power, country, country_code, region, 
+                income_group, gdp, gdp_percap, population, everything())
 power <- power[complete.cases(power[ , 3]),]
 power$income_group <- as.factor(power$income_group)
 power <- mutate(power,
@@ -101,23 +117,28 @@ numbyincome <- as.data.frame(power %>%
              group_by(income_group) %>% 
              summarise(byincome = n()))
 
-# generalized linear models #### ADD COMMENTED SUMMARIES
+## average percent loss by income group
+girlsedbyincome <- as.data.frame(power %>% 
+                    group_by(income_group) %>% 
+                    summarise(mean(girlsed, na.rm = TRUE)))
+
+# generalized linear models 
 
 # gdp per capita vs. percent loss
 gdp_percentloss <- glm(gdp_percap ~ percentloss, data = power)
-summary(gdp_percentloss) 
+summary(gdp_percentloss) # intercept = 28953.6, slope = -851.6, p < .001
 
 # kwh per capita vs. percent loss
 percentloss_kwh <-  glm(kwh ~ percentloss, data = power)
-summary(percentloss_kwh)
+summary(percentloss_kwh) # intercept = 6866.62, slope =-184.9, p < .001
 
 # kwh per capita vs. gdp per capita
-gdp_kwh <-  glm(gdp_percap ~ kwh, data = power)
-summary(gdp_kwh)
+gdp_kwh <-  glm(kwh ~ gdp_percap, data = power)
+summary(gdp_kwh) # intercept = 1134, slope = .1845, p < .001
 
 # access vs. loss
 access_loss <- glm(access ~ kwh, data = power)
-summary(access_loss)
+summary(access_loss) # intercept = 82.16, slope = .00132, p < .001
 
 # ......................................................................................................
 
@@ -160,9 +181,4 @@ ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) +
        caption = "based on most recent available data from the World Bank (2014)",
        x = "Access to Electricity(%)", 
        y = "kWh per Capita")
-
-
-
-
-
 
