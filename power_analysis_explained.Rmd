@@ -3,16 +3,17 @@ title: 'HultPrize2018: Electric Power Loss & Covariates'
 author: "C. McClintock"
 date: "Spring 2018"
 output: 
-  html_document:
+  html_document: 
     toc: TRUE
     toc_float: TRUE
     depth: 5
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning = FALSE, echo = FALSE)
 setwd("/Users/charmed33/R/HultPrize2018")
 library(tidyverse)
+library(knitr)
 library(dplyr)
 ```
 
@@ -116,6 +117,20 @@ Data accessed through the [World Bank Open Data Portal](https://data.worldbank.o
 
 We are interested in what variables affect and are correlated with electric power and distribution losses. The variables included in our analysis are electric power transmission and distribution losses (by % of output), access to electricity (% of population), total population, GDP (total US$), and development indicators in GDP per capita, and education of girls by % of female primary school age children out of school.
 
+### Highest percent losses
+
+```{r desc}
+arb <- select(power, country, percentloss)
+kable(head(arrange(arb, -percentloss), 10))
+```
+
+### Lowest kWh per capita 
+
+```{r desc2}
+arb2 <- select(power, country, kwh)
+kable(head(arrange(arb2, kwh), 10))
+```
+
 ### GDP per Capita vs. kWh per Capita
 
  First, economic development, measured by GDP per capita and energy use, measured by kWh per capita, are highly correlated in a basic linear model. Interestingly, Iceland has the highest kWh per capita, twice as high as the next country, and will be excluded from the models for clarity.
@@ -132,9 +147,9 @@ ggplot(data = power, mapping = aes(gdp_percap, kwh), na.rm = TRUE) +
        y = "kWh per Capita")
 ```
 
-Next, looking at electric power distribution and transmission loss as a function of GDP per capita. As expected, the highest output losses occur in the lowest income countries.  
-
 ### GDP per Capita vs. Transmission & Distribution Loss (% of output)
+
+Next, looking at electric power distribution and transmission loss as a function of GDP per capita. As expected, the highest output losses occur in the lowest income countries.  
 
 ```{r plot 2, echo = FALSE}
 # gdp per capita vs. percent loss
@@ -147,7 +162,10 @@ ggplot(data = power, mapping = aes(gdp_percap, percentloss, na.rm = TRUE)) +
        y = "Electric power transmission and distribution losses (% of output)")
 ```
 
-### kWh per Capita vs. Transmission & Distribution Loss (% of output
+### kWh per Capita vs. Transmission & Distribution Loss (% of output)
+
+
+
 ```{r plot 3, echo = FALSE}
 # kwh per capita vs. percent loss
 ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) + 
@@ -161,6 +179,9 @@ ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) +
 
 
 ### Percent Access to Electricity vs. kWh per Capita
+
+
+
 ``` {r plot 4, echo = FALSE}
 # kwh per capita vs. percent access
 ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) + 

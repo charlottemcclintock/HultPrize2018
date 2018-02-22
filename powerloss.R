@@ -182,3 +182,5 @@ ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) +
        x = "Access to Electricity(%)", 
        y = "kWh per Capita")
 
+
+
