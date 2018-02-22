@@ -127,8 +127,8 @@ ggplot(data = power, mapping = aes(gdp_percap, percentloss, na.rm = TRUE)) +
 # kwh per capita vs. percent loss
 ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) + 
   geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE) +
-  labs(colour = "Income Level", 
-       title = "GDP per Capita vs. kWh per Capita", 
+  coord_cartesian(ylim = c(0,25000)) + labs(colour = "Income Level", 
+       title = "kWh per Capita vs. Transmission & Distribution Loss (% of output)", 
        caption = "based on most recent available data from the World Bank (2014)",
        x = "kWh per Capita", 
        y = "Electric power transmission and distribution losses (% of output)")
