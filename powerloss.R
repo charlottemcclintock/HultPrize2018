@@ -1,13 +1,18 @@
 # C. McClintock
-# Electric Power Losses
+# Electricity Theft
+# Feb. 21st, 2018
 
+# ......................................................................................................
 
-library(tidyverse)
-library(dplyr)
+# DATA IMPORT & CLEANING
 
 # set up
 getwd()
 setwd("/Users/charmed33/R/HultPrize2018")
+
+# libraries
+library(tidyverse)
+library(dplyr)
 
 # read in the data, all from the world bank
 powerloss <- read_csv("electric_loss.csv", skip = 4) 
@@ -71,7 +76,9 @@ power <- mutate(power,
                   "Upper middle income",
                   "High income"))
 
-# exploratory data analysis
+# .......................................................................................................
+
+# EXPLORATORY DATA ANALYSIS
 
 # how much electricity is being lost?
 summary(power$percentloss) # average of 13 percent loss, much higher in poor countries
@@ -112,13 +119,14 @@ summary(gdp_kwh)
 access_loss <- glm(access ~ kwh, data = power)
 summary(access_loss)
 
+# ......................................................................................................
 
-# some visualization
+# VISUALIZATION
 
 # gdp per capita vs. percent loss
 ggplot(data = power, mapping = aes(gdp_percap, percentloss, na.rm = TRUE)) + 
   geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE) +
-  labs(colour = "Income Level", 
+  coord_cartesian(xlim = c(0, 125000)) + labs(colour = "Income Level", 
        title = "GDP per Capita vs. Transmission & Distribution Loss (% of output)", 
        caption = "based on most recent available data from the World Bank (2014)",
        x = "GDP per Capita (US$)", 
@@ -127,7 +135,7 @@ ggplot(data = power, mapping = aes(gdp_percap, percentloss, na.rm = TRUE)) +
 # kwh per capita vs. percent loss
 ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) + 
   geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE) +
-  coord_cartesian(ylim = c(0,25000)) + labs(colour = "Income Level", 
+  coord_cartesian(xlim = c(0, 25000)) + labs(colour = "Income Level", 
        title = "kWh per Capita vs. Transmission & Distribution Loss (% of output)", 
        caption = "based on most recent available data from the World Bank (2014)",
        x = "kWh per Capita", 
@@ -136,8 +144,8 @@ ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) +
 # kwh per capita vs. gdp per capita
 ggplot(data = power, mapping = aes(gdp_percap, kwh), na.rm = TRUE) + 
   geom_point(aes(colour = factor(income_group)), size = 2) + 
-  geom_smooth(method = "lm", se = FALSE) + coord_cartesian(xlim = c(0,125000), ylim=c(0,25000)) +
-  labs(colour = "Income Level", 
+  geom_smooth(method = "lm", se = FALSE) + coord_cartesian(xlim = c(0,125000), 
+  ylim=c(0,25000)) + labs(colour = "Income Level", 
        title = "GDP per Capita vs. kWh per Capita", 
        caption = "based on most recent available data from the World Bank (2014)",
        x = "GDP per Capita", 
