@@ -98,12 +98,15 @@ power <- mutate(power,
 ```
 
 
-## Goal
+## Objective
 > Explore trends related to global electricity theft to better understand energy consumption and correlated variables to pitch a scalable, sustainable social enterprise to bring energy to 10 million people currently living in energy poverty. 
 
-## Data
+## Background
+Electricity theft, also called non-technical line loss, costs the energy utility industry $96 billion per year, most of that concentrated in emerging markets. [1](https://www.prnewswire.com/news-releases/96-billion-is-lost-every-year-to-electricity-theft-300453411.html) Of the total theft detected, 80% comes from residential buildings and 20% from commercial and industrial premises. [2](http://www.ajer.org/papers/v4(01)/I0401059069.pdf) Hook lines are the most common used method of electricity theft, with 80% of global power theft is by direct tapping from the main power line. [3](http://file.scirp.org/Html/1-1770179_70365.htm) Theft of electricity causes significant harm to the economy, including include loss of revenue and profit of electricity providers and decrease of the stability and reliability of electrical power grids, as in some countries theft may range up to 40% of the total electricity distributed. [4](https://www.atlantis-press.com/journals/ijcis/25872435) India alone loses $16.2 billion  per year, and plans to invest $21.6 billion  between 2015 and 2025 to develop a smart grid to prevent fraud and theft. [5](http://www.tdworld.com/smart-grid/india-spend-216-billion-smart-grid-infrastructure-2025)
 
-Data accessed through the [World Bank Open Data Portal](https://data.worldbank.org)
+## Data Origin
+
+Data accessed through the [World Bank Open Data Portal](https://data.worldbank.org).
 
 * Data Sets:
     + [Population, total](https://data.worldbank.org/indicator/SP.POP.TOTL)
@@ -115,21 +118,34 @@ Data accessed through the [World Bank Open Data Portal](https://data.worldbank.o
      
 ## Exploratory Data Analysis
 
-We are interested in what variables affect and are correlated with electric power and distribution losses. The variables included in our analysis are electric power transmission and distribution losses (by % of output), access to electricity (% of population), total population, GDP (total US$), and development indicators in GDP per capita, and education of girls by % of female primary school age children out of school.
+We are interested in what variables affect and are correlated with theft of electricity, studied through electric power and distribution losses. The variables included in our analysis are electric power transmission and distribution losses (by % of output), access to electricity (% of population), total population, GDP (total US$), and development indicators in GDP per capita, and education of girls by % of female primary school age children out of school.
 
 ### Highest percent losses
 
 ```{r desc}
 arb <- select(power, country, percentloss)
-kable(head(arrange(arb, -percentloss), 10))
+kable(head(arrange(arb, -percentloss), 10), col.names = c("Country", 
+                     "Electric power transmission and distribution losses (% of output)"))
 ```
 
 ### Lowest kWh per capita 
 
 ```{r desc2}
 arb2 <- select(power, country, kwh)
-kable(head(arrange(arb2, kwh), 10))
+kable(head(arrange(arb2, kwh), 10), col.names = c("Country", "Electric power consumption (kWh per capita)"))
 ```
+
+### Average Power Loss by Income Group
+
+```{r tab}
+percentbyincome <- as.data.frame(power %>% 
+             group_by(income_group) %>% 
+              summarise(mean(percentloss, na.rm = TRUE)))
+kable(percentbyincome, col.names = c("Income Group",
+                                     "Average electric power transmission and distribution losses (% of output)"))
+```
+
+***
 
 ### GDP per Capita vs. kWh per Capita
 
@@ -147,6 +163,8 @@ ggplot(data = power, mapping = aes(gdp_percap, kwh), na.rm = TRUE) +
        y = "kWh per Capita")
 ```
 
+***
+
 ### GDP per Capita vs. Transmission & Distribution Loss (% of output)
 
 Next, looking at electric power distribution and transmission loss as a function of GDP per capita. As expected, the highest output losses occur in the lowest income countries.  
@@ -159,12 +177,14 @@ ggplot(data = power, mapping = aes(gdp_percap, percentloss, na.rm = TRUE)) +
        title = "GDP per Capita vs. Transmission & Distribution Loss (% of output)", 
        caption = "based on most recent available data from the World Bank (2014)",
        x = "GDP per Capita (US$)", 
-       y = "Electric power transmission and distribution losses (% of output)")
+       y = "Electric power losses (% of output)")
 ```
+
+***
 
 ### kWh per Capita vs. Transmission & Distribution Loss (% of output)
 
-
+Low electric power consumption (kWh per capita) is associated with high rates of loss (theft), and high electric power consumer means almost no theft. 
 
 ```{r plot 3, echo = FALSE}
 # kwh per capita vs. percent loss
@@ -173,16 +193,17 @@ ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) +
   coord_cartesian(xlim = c(0, 25000)) + labs(colour = "Income Level", 
        title = "kWh per Capita vs. Transmission & Distribution Loss (% of output)", 
        caption = "based on most recent available data from the World Bank (2014)",
-       x = "kWh per Capita", 
-       y = "Electric power transmission and distribution losses (% of output)")
+       x = "Electric power consumption (kWh per capita)", 
+       y = "Electric power losses (% of output)")
 ```
 
+***
 
 ### Percent Access to Electricity vs. kWh per Capita
 
+This is the most interesting trend discovered. Power consumption in kWh per capita does not rise substantially until a country has 100% electrification, and upper middle or high income levels. 
 
-
-``` {r plot 4, echo = FALSE}
+```{r graph}
 # kwh per capita vs. percent access
 ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) + 
   geom_point(aes(colour = factor(income_group)), size = 2) + 
@@ -191,8 +212,18 @@ ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) +
        title = "Percent Access to Electricity vs. kWh per Capita", 
        caption = "based on most recent available data from the World Bank (2014)",
        x = "Access to Electricity(%)", 
-       y = "kWh per Capita")
+       y = "Electric power consumption (kWh per capita)")
+  
 ```
 
 
-  
+
+## Conclusion
+
+Causation cannot be drawn from correlation, but the results are informative. Total electric power consumption only substantially increases when 100% of the population can be connected to the grid. There is substantial space in the market for investment in theft-resistant technologies.
+
+
+
+
+
+

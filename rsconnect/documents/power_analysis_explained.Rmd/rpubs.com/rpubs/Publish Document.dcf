@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/363225/7f0ee792557041ec854255e30fbbf6ee
+bundleId: https://api.rpubs.com/api/v1/document/363225/7f0ee792557041ec854255e30fbbf6ee
+url: http://rpubs.com/charlottemcclintock/363225
+when: 1519341006.05018

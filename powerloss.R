@@ -117,10 +117,11 @@ numbyincome <- as.data.frame(power %>%
              group_by(income_group) %>% 
              summarise(byincome = n()))
 
-## average percent loss by income group
-girlsedbyincome <- as.data.frame(power %>% 
-                    group_by(income_group) %>% 
-                    summarise(mean(girlsed, na.rm = TRUE)))
+## number of countries in each income group
+percentbyregion <- as.data.frame(power %>% 
+                               group_by(region) %>% 
+                               summarise(mean(percentloss, na.rm = TRUE)))
+
 
 # generalized linear models 
 
@@ -159,18 +160,17 @@ ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) +
   coord_cartesian(xlim = c(0, 25000)) + labs(colour = "Income Level", 
        title = "kWh per Capita vs. Transmission & Distribution Loss (% of output)", 
        caption = "based on most recent available data from the World Bank (2014)",
-       x = "kWh per Capita", 
-       y = "Electric power transmission and distribution losses (% of output)")
+       x = "Electric power consumption (kWh per capita)", 
+       y = "Electric power losses (% of output)")
 
 # kwh per capita vs. gdp per capita
-ggplot(data = power, mapping = aes(gdp_percap, kwh), na.rm = TRUE) + 
-  geom_point(aes(colour = factor(income_group)), size = 2) + 
-  geom_smooth(method = "lm", se = FALSE) + coord_cartesian(xlim = c(0,125000), 
-  ylim=c(0,25000)) + labs(colour = "Income Level", 
-       title = "GDP per Capita vs. kWh per Capita", 
+ggplot(data = power, mapping = aes(kwh, gdp_percap), na.rm = TRUE) + 
+  geom_point(aes(colour = factor(income_group)), size = 2) + coord_cartesian(ylim = c(0,125000),
+  xlim=c(0,25000)) + labs(colour = "Income Level", 
+       title = "Electric power consumption vs. GDP per Capita", 
        caption = "based on most recent available data from the World Bank (2014)",
-       x = "GDP per Capita", 
-       y = "kWh per Capita")
+       y = "GDP per Capita", 
+       x = "Electric power consumption (kWh per capita)")
 
 # kwh per capita vs. percent access
 ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) + 
@@ -180,7 +180,6 @@ ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) +
        title = "Percent Access to Electricity vs. kWh per Capita", 
        caption = "based on most recent available data from the World Bank (2014)",
        x = "Access to Electricity(%)", 
-       y = "kWh per Capita")
-
+       y = "Electric power consumption (kWh per capita)")
 
 
