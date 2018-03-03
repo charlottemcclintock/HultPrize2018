@@ -25,6 +25,8 @@ kwh <- read_csv("kwhpercap.csv", skip = 4)
 # Electric power consumption (kWh per capita)
 gdp <- read_csv("gdp.csv", skip = 4)
 # GDP (current US$)
+gdppercap <- read_csv("gdppercap.csv", skip = 4)
+# GDP per capita (international PPP $)
 countries <- read_csv("wb_countrydata.csv")
 # Children out of school, female (% of female primary school age)
 girlsed <- read_csv("girlsed.csv", skip = 4)
@@ -41,6 +43,10 @@ colnames(population)[colnames(population)=="2014"] <- "population"
 colnames(gdp)[colnames(gdp)=="Country Name"] <- "country"
 colnames(gdp)[colnames(gdp)=="Country Code"] <- "country_code"
 colnames(gdp)[colnames(gdp)=="2014"] <- "gdp"
+
+colnames(gdppercap)[colnames(gdppercap)=="Country Name"] <- "country"
+colnames(gdppercap)[colnames(gdppercap)=="Country Code"] <- "country_code"
+colnames(gdppercap)[colnames(gdppercap)=="2014"] <- "gdppercap"
 
 colnames(kwh)[colnames(kwh)=="Country Name"] <- "country"
 colnames(kwh)[colnames(kwh)=="Country Code"] <- "country_code"
@@ -61,6 +67,7 @@ names(countries) <- c("country_code","region","income_group","country")
 powerloss <- select(powerloss, country, country_code, percentloss)
 population <- select(population, country, country_code, population)
 gdp <- select(gdp, country, country_code, gdp)
+gdppercap <- select(gdppercap, country, country_code, gdppercap)
 kwh <- select(kwh, country, country_code, kwh)
 access <- select(access, country, country_code, access)
 girlsed <- select(girlsed, country, country_code, girlsed)
@@ -72,6 +79,8 @@ power <- left_join(power, population, by =
            c("country_code" = "country_code", "country" = "country"))
 power <- left_join(power, gdp, by = 
            c("country_code" = "country_code", "country" = "country"))
+power <- left_join(power, gdppercap, by = 
+                     c("country_code" = "country_code", "country" = "country"))
 power <- left_join(power, kwh, by = 
            c("country_code" = "country_code", "country" = "country"))
 power <- left_join(power, access, by = 
@@ -138,7 +147,7 @@ gdp_kwh <-  glm(kwh ~ gdp_percap, data = power)
 summary(gdp_kwh) # intercept = 1134, slope = .1845, p < .001
 
 # access vs. loss
-access_loss <- glm(access ~ kwh, data = power)
+access_loss <- glm(percentloss ~ access, data = power)
 summary(access_loss) # intercept = 82.16, slope = .00132, p < .001
 
 # ......................................................................................................
@@ -155,13 +164,13 @@ ggplot(data = power, mapping = aes(gdp_percap, percentloss, na.rm = TRUE)) +
        y = "Electric power transmission and distribution losses (% of output)")
 
 # kwh per capita vs. percent loss
-ggplot(data = power, mapping = aes(kwh, percentloss, na.rm = TRUE)) + 
+ggplot(data = power, mapping = aes(percentloss, kwh, na.rm = TRUE)) + 
   geom_point(aes(colour = factor(income_group)), size = 2) + geom_smooth(se = FALSE) +
-  coord_cartesian(xlim = c(0, 25000)) + labs(colour = "Income Level", 
-       title = "kWh per Capita vs. Transmission & Distribution Loss (% of output)", 
+  coord_cartesian(ylim = c(0, 25000)) + labs(colour = "Income Level", 
+       title = "Transmission & Distribution Loss (% of output) vs. Electric Power Consumption", 
        caption = "based on most recent available data from the World Bank (2014)",
-       x = "Electric power consumption (kWh per capita)", 
-       y = "Electric power losses (% of output)")
+       y = "Electric power consumption (kWh per capita)", 
+       x = "Electric power losses (% of output)")
 
 # kwh per capita vs. gdp per capita
 ggplot(data = power, mapping = aes(kwh, gdp_percap), na.rm = TRUE) + 
@@ -182,4 +191,24 @@ ggplot(data = power, mapping = aes(access, kwh), na.rm = TRUE) +
        x = "Access to Electricity(%)", 
        y = "Electric power consumption (kWh per capita)")
 
+# gdp per capita (US$) vs. percent access
+ggplot(data = power, mapping = aes(access, gdp_percap), na.rm = TRUE) + 
+  geom_point(aes(colour = factor(income_group)), size = 2)  + 
+  coord_cartesian(ylim = c(0,125000)) + 
+  labs(colour = "Income Level", 
+       title = "Percent Access to Electricity vs. GDP per Capita", 
+       subtitle = "GDP only increases meaningfully once >99% of the population has access to electricity",
+       caption = "based on most recent available data from the World Bank (2014)",
+       x = "Access to Electricity(%)", 
+       y = "GDP per capita (US$)")
 
+# gdp per capita (PPP) vs. percent access
+ggplot(data = power, mapping = aes(access, gdppercap), na.rm = TRUE) + 
+  geom_point(aes(colour = factor(income_group)), size = 2)  + 
+  coord_cartesian(ylim = c(0,125000)) + 
+  labs(colour = "Income Level", 
+       title = "Percent Access to Electricity vs. GDP per Capita", 
+       subtitle = "GDP only increases meaningfully once >99% of the population has access to electricity",
+       caption = "based on most recent available data from the World Bank (2014)",
+       x = "Access to Electricity(%)", 
+       y = "GDP per capita (PPP)")
